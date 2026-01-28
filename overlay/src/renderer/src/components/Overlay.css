@@ -5,12 +5,16 @@
   color: #f0e6d2;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .overlay-header {
   padding: 20px;
   background: #1a1a2e;
   border-bottom: 2px solid #c8aa6e;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .overlay-header h1 {
@@ -21,38 +25,54 @@
 
 .overlay-content {
   flex: 1;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.game-info {
-  background: #1a1a2e;
   padding: 20px;
-  border-radius: 12px;
-  border: 2px solid #c8aa6e;
-}
-
-.game-info h2 {
-  margin: 0 0 16px 0;
-  color: #c8aa6e;
-  font-size: 20px;
-}
-
-.game-info p {
-  margin: 8px 0;
-  font-size: 16px;
+  overflow-y: auto;
 }
 
 .waiting-message {
   text-align: center;
-  padding: 40px;
+  padding: 60px 40px;
   background: rgba(200, 170, 110, 0.1);
   border-radius: 12px;
+  margin-top: 40px;
 }
 
 .waiting-message p {
-  font-size: 18px;
+  font-size: 20px;
   color: #a09b8c;
+}
+
+.teams-container {
+  display: flex;
+  gap: 20px;
+}
+
+.team-section {
+  flex: 1;
+}
+
+.team-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.team-title.ally {
+  background: rgba(74, 158, 255, 0.2);
+  color: #4a9eff;
+  border-left: 4px solid #4a9eff;
+}
+
+.team-title.enemy {
+  background: rgba(255, 74, 74, 0.2);
+  color: #ff4a4a;
+  border-left: 4px solid #ff4a4a;
+}
+
+.players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }

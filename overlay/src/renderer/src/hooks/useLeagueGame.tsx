@@ -34,7 +34,7 @@ export const useLeagueGame = () => {
                     previousGameState = false
                 }
             }
-        }, 5000)
+        }, 1000)
 
     const checkNow = async () => {
         try {

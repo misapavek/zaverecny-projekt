@@ -1,14 +1,13 @@
-import { app, shell, BrowserWindow, ipcMain, globalShortcut } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import https from 'https'
 
-let desktopWindow: BrowserWindow | null = null
-let overlayWindow: BrowserWindow | null = null
+let mainWindow: BrowserWindow | null = null
 
-function createDesktopWindow(): void {
-  desktopWindow = new BrowserWindow({
+function createWindow(): void {
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     autoHideMenuBar: true,
@@ -19,73 +18,27 @@ function createDesktopWindow(): void {
     }
   })
 
-  desktopWindow.on('ready-to-show', () => {
-    desktopWindow?.show()
+  mainWindow.on('ready-to-show', () => {
+    mainWindow?.show()
   })
 
-  desktopWindow.webContents.setWindowOpenHandler((details) => {
+  mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    desktopWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    desktopWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
-  desktopWindow.on('closed', () => {
-    desktopWindow = null
-  })
-}
-
-function createOverlayWindow(): void {
-  overlayWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
-    x: 20,
-    y: 20,
-    frame: false,
-    transparent: true,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    resizable: false,
-    show: false,
-    autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
-    }
-  })
-
-  overlayWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-    return { action: 'deny' }
-  })
-
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    overlayWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    overlayWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-
-  overlayWindow.on('closed', () => {
-    overlayWindow = null
+  mainWindow.on('closed', () => {
+    mainWindow = null
   })
 }
 
 app.whenReady().then(() => {
-  globalShortcut.register('CommandOrControl+X', () => {
-    if (overlayWindow) {
-      if (overlayWindow.isVisible()) {
-        overlayWindow.hide()
-      } else {
-        overlayWindow.show()
-      }
-    }
-  })
-
   electronApp.setAppUserModelId('com.electron')
 
   app.on('browser-window-created', (_, window) => {
@@ -94,12 +47,11 @@ app.whenReady().then(() => {
 
   ipcMain.on('ping', () => console.log('pong'))
 
-  createDesktopWindow()
-  createOverlayWindow()
+  createWindow()
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createDesktopWindow()
+      createWindow()
     }
   })
 })
@@ -107,24 +59,6 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
-  }
-})
-
-app.on('will-quit', () => {
-  globalShortcut.unregisterAll()
-})
-
-// Handle game state changes
-ipcMain.on('game-state-changed', (_event, isInGame: boolean) => {
-  if (isInGame) {
-    if (!overlayWindow) {
-      createOverlayWindow()
-    }
-    overlayWindow?.show()
-    desktopWindow?.hide()
-  } else {
-    overlayWindow?.hide()
-    desktopWindow?.show()
   }
 })
 
